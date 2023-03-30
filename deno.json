@@ -1,0 +1,8 @@
+{
+    "title":"Vue SFC Compiler Service",
+    "description":"A vue sfc compiler service",
+    "type":"module",
+    "tasks":{
+        "app":"deno run --allow read main.mjs"
+    }
+}
