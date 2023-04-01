@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
+import { ServeInit, serve } from "https://deno.land/std@0.181.0/http/server.ts";
 import {compileWithCss} from './sfc-compiler.ts'
 
 async function handler (request: Request): Promise<Response> {
@@ -12,8 +12,8 @@ async function handler (request: Request): Promise<Response> {
     }
 };
 
-export async function startServer(){
-    await serve(handler);
+export async function startServer(serverOptions:ServeInit){
+    await serve(handler,serverOptions);
 }
 function empty(value: string){
     return value == null || value === '';

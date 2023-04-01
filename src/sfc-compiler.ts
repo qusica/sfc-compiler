@@ -1,4 +1,4 @@
-import { compileScript, compileTemplate, parse,rewriteDefault,compileStyleAsync,CompilerOptions,SFCDescriptor,BindingMetadata } from "https://esm.sh/@vue/compiler-sfc";
+import { compileScript, compileTemplate, parse,rewriteDefault,compileStyle,CompilerOptions,SFCDescriptor,BindingMetadata } from "https://esm.sh/@vue/compiler-sfc";
 import { CompileResult,CompileError, CompileData } from './types.ts'
 import hashId from 'https://esm.sh/hash-sum'
 import { transform } from 'https://esm.sh/sucrase'
@@ -6,7 +6,7 @@ import {compileSass} from "./sass.ts";
 
 const COMP_IDENTIFIER = `__sfc__`
 
-export async function compile(filename: string,runtimeModuleName: string,code: string): Promise<CompileResult>{
+export function compile(filename: string,runtimeModuleName: string,code: string): CompileResult{
     const id = hashId(filename);
     const compilerOptions = {
         runtimeModuleName,
@@ -60,13 +60,12 @@ export async function compile(filename: string,runtimeModuleName: string,code: s
             style.content = compiledCss;
             //console.log(`parsed ${style.lang} to css:`,style.content)
         }
-        const styleResult = await compileStyleAsync({
+        const styleResult = compileStyle({
             isProd:true,
             source: style.content,
             filename,
             id,
-            scoped: style.scoped,
-            modules: !!style.module
+            scoped: style.scoped
         })
         if (styleResult.errors.length) {
             // postcss uses pathToFileURL which isn't polyfilled in the browser
@@ -74,11 +73,12 @@ export async function compile(filename: string,runtimeModuleName: string,code: s
             throw new CompileError(styleResult.errors)
         // proceed even if css compile errors
         } else {
-            css += styleResult.code + '\n'
+            css += styleResult.code
         }
     }
     if (css) {
         compiled.css = css.trim()
+        //console.log(compiled.css)
     } 
     return compiled;
 }
@@ -99,6 +99,7 @@ function doCompileScript(compilerOptions:CompilerOptions,descriptor:SFCDescripto
                     }
                 }
             })
+            compiledScript.content = compiledScript.content.replace(/from\s+'vue'/,`from '${compilerOptions.runtimeModuleName}'`)
             let code = '';
             
             code +=
@@ -166,8 +167,8 @@ function doCompileTemplate(
     }).code
   }
 
-  export async function compileWithCss(filename:string,runtimeModuleName:string,content:string): Promise<CompileResult>{
-    const compiled = await compile(filename,runtimeModuleName,content);
+  export function compileWithCss(filename:string,runtimeModuleName:string,content:string): CompileResult{
+    const compiled = compile(filename,runtimeModuleName,content);
     if(compiled.css){
         let js = compiled.js ? compiled.js+'\n' : '';
         js += `

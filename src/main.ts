@@ -1,4 +1,4 @@
 import { startServer } from './server.ts'
-
-startServer();
+import config from '../config.json' assert {type:'json'};
+startServer(config.server);
 
