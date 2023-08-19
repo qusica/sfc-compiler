@@ -1,0 +1,14 @@
+[Unit]
+Description=Vue sfc compile service
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=path/to/project/start.sh
+WorkingDirectory=path/to/project
+
+TimeoutStopSec=20
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
